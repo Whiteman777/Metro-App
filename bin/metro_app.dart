@@ -23,7 +23,7 @@ void main() {
   final path = graph.shortestPath(startStation, stopStation);
   final hops = path.length - 1;
   final double duration = hops * 2.25;
-  final direction = graph.direction(path);
+  final directions = graph.directions(path);
   var transfers = 0;
   for (var i = 0; i < path.length; i++) {
     if (graph.needsChange(path, i)) transfers++;
@@ -31,7 +31,7 @@ void main() {
 
   print("number of stations => $hops");
   print("number of transfers => $transfers");
-  print("direction => $direction");
+  print("direction => ${directions.join(" => ")}");
   print("estimated time => $duration min");
   print(
     "price => ${TicketType.forHops(hops).price}, ticket duration => ${TicketType.duration} hours",

@@ -116,30 +116,34 @@ class MetroGraph {
     return path.reversed.toList();
   }
 
-  String direction(List<String> path) {
-    if (path.length < 2) return "None";
+  List<String> directions(List<String> path) {
+    if (path.length < 2) return ['None'];
 
-    for (final line in _lines) {
-      final orders = <String, int>{};
-      for (final s in line.stations) {
-        orders[normalize(s.name)] = s.order;
+    final result = <String>[];
+    var legStart = 0;
+    var line = _lineOfSegment(path[0], path[1]);
+
+    for (var i = 2; i < path.length; i++) {
+      final segmentLine = _lineOfSegment(path[i - 1], path[i]);
+      if (segmentLine != line) {
+        result.add(_legDirection(line!, path, legStart, i - 1));
+        line = segmentLine;
+        legStart = i - 1;
       }
-
-      final o0 = orders[normalize(path[0])];
-      final o1 = orders[normalize(path[1])];
-      if (o0 == null || o1 == null || (o0 - o1).abs() != 1) continue;
-
-      var lastOrder = o1;
-      for (var i = 2; i < path.length; i++) {
-        final oi = orders[normalize(path[i])];
-        if (oi == null || (oi - lastOrder).abs() != 1) break;
-        lastOrder = oi;
-      }
-
-      return lastOrder > o0
-          ? line.stations.last.name
-          : line.stations.first.name;
     }
-    return "None";
+    result.add(_legDirection(line!, path, legStart, path.length - 1));
+    return result;
+  }
+
+  String _legDirection(MetroLine line, List<String> path, int start, int end) {
+    final orders = <String, int>{};
+    for (final s in line.stations) {
+      orders[normalize(s.name)] = s.order;
+    }
+    final firstOrder = orders[normalize(path[start])]!;
+    final lastOrder = orders[normalize(path[end])]!;
+    return lastOrder > firstOrder
+        ? line.stations.last.name
+        : line.stations.first.name;
   }
 }
