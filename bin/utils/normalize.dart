@@ -1,0 +1,1 @@
+String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');

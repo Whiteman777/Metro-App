@@ -1,13 +1,8 @@
 import "dart:io";
 
-import "package:collection/collection.dart";
+import '../services/metro_graph.dart';
 
-import "../models/station.dart";
-import "../models/metro_line.dart";
-
-String normalize(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z]'), '');
-
-Station promptForStation(MetroLine line, String prompt) {
+String promptForStation(MetroGraph graph, String prompt) {
   while (true) {
     print(prompt);
     final input = stdin.readLineSync();
@@ -17,13 +12,8 @@ Station promptForStation(MetroLine line, String prompt) {
       continue;
     }
 
-    final found = line.stations.firstWhereOrNull(
-      (station) => normalize(station.name) == normalize(input),
-    );
-
-    if (found != null) {
-      return found;
-    }
+    final found = graph.find(input);
+    if (found != null) return found;
     print("This station doesn't exist, try again.");
   }
 }
