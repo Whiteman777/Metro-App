@@ -8,10 +8,10 @@ enum TicketType {
   final int price;
   static const int duration = 2;
 
-  static TicketType forHops(int hops) {
-    if (hops <= 9) return basic;
-    if (hops <= 16) return standard;
-    if (hops <= 23) return extended;
-    return longDistance;
-  }
+  static TicketType forHops(int hops) => switch (hops) {
+        <= 9 => basic,
+        <= 16 => standard,
+        <= 23 => extended,
+        _ => longDistance,
+      };
 }
