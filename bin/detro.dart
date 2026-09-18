@@ -20,9 +20,10 @@ void main() {
     "What are your starting station?",
   );
   final stopStation = promptForStation(graph, "What are your stoping station?");
-  final path = graph.shortestPath(startStation, stopStation);
-  final hops = path.length - 1;
-  final double duration = hops * 2.25;
+  final trip = graph.shortestTrip(startStation, stopStation);
+  final path = trip.stations;
+  final hops = trip.hops;
+  final duration = trip.minutes;
   final directions = graph.directions(path);
   var transfers = 0;
   for (var i = 0; i < path.length; i++) {
@@ -32,7 +33,7 @@ void main() {
   print("number of stations => $hops");
   print("number of transfers => $transfers");
   print("direction => ${directions.join(" => ")}");
-  print("estimated time => $duration min");
+  print("estimated time => ${duration.toStringAsFixed(2)} min");
   print(
     "price => ${TicketType.forHops(hops).price}, ticket duration => ${TicketType.duration} hours",
   );

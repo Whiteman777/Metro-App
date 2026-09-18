@@ -1,6 +1,7 @@
 import "dart:io";
 
 import '../services/metro_graph.dart';
+import '../utils/normalize.dart';
 
 String promptForStation(MetroGraph graph, String prompt) {
   while (true) {
@@ -14,6 +15,12 @@ String promptForStation(MetroGraph graph, String prompt) {
 
     final found = graph.find(input);
     if (found != null) return found;
-    print("This station doesn't exist, try again.");
+
+    final suggestions = fuzzyRank(input, graph.stations);
+    if (suggestions.isEmpty) {
+      print("This station doesn't exist, try again.");
+    } else {
+      print("This station doesn't exist. Did you mean: ${suggestions.join(', ')}?");
+    }
   }
 }

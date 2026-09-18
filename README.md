@@ -1,4 +1,4 @@
-# Metro App
+# Detro
 
 A command-line application that calculates your Cairo Metro trip across the full network: Line 1 (El-Marg), Line 2 (Shubra El-Kheima), Line 3 (Adly Mansour / Rod El-Farag), and the Line 3 Cairo University branch.
 
@@ -15,7 +15,7 @@ A command-line application that calculates your Cairo Metro trip across the full
 ## Usage
 
 ```bash
-dart run bin/metro_app.dart
+dart run bin/detro.dart
 ```
 
 Then enter your starting and stopping stations when prompted.
@@ -35,7 +35,7 @@ Route => El-Marg => ... => Sadat (change) => Opera => Dokki
 
 ## Structure
 
-- `bin/metro_app.dart` — entry point
+- `bin/detro.dart` — entry point
 - `bin/data/` — line data files and station prompt helper
 - `bin/models/` — station, line, and ticket models
 - `bin/services/metro_graph.dart` — graph construction, BFS shortest path, and direction
