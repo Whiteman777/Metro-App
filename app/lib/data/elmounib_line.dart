@@ -3,12 +3,12 @@ import '../models/station.dart';
 
 class ElMounibLine extends MetroLine {
   const ElMounibLine()
-      : super(
-          name: "elmounib",
-          stations: elMounibStations,
-          headwayMinutes: 3,
-          segmentMinutes: 2.5,
-        );
+    : super(
+        name: "elmounib",
+        stations: elMounibStations,
+        headwayMinutes: 3,
+        segmentMinutes: 2.5,
+      );
 
   static const List<Station> elMounibStations = [
     Station(name: 'Shubra El-Kheima', order: 1, isTransitional: false),

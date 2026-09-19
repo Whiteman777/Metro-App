@@ -19,9 +19,9 @@ enum AppLang { english, arabic }
 String _tr(AppLang lang, String en, String ar) =>
     lang == AppLang.arabic ? ar : en;
 
-/// Formats a duration in minutes, switching to hours once it reaches 60.
-/// English spells out the unit ("1 hour 30 minutes"); Arabic uses
-/// ساعة/دقيقة with the usual plural forms.
+
+
+
 String _formatDuration(AppLang lang, double minutes) {
   if (minutes < 60) {
     return '${minutes.toStringAsFixed(0)} '
@@ -131,12 +131,30 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
 
   final _startController = TextEditingController();
   final _stopController = TextEditingController();
+  GateMode _gateMode = GateMode.fewestStops;
 
   TripResult? _result;
   String? _error;
 
   @override
+  void initState() {
+    super.initState();
+    
+    
+    
+    
+    _startController.addListener(_onFieldTextChanged);
+    _stopController.addListener(_onFieldTextChanged);
+  }
+
+  void _onFieldTextChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
   void dispose() {
+    _startController.removeListener(_onFieldTextChanged);
+    _stopController.removeListener(_onFieldTextChanged);
     _startController.dispose();
     _stopController.dispose();
     super.dispose();
@@ -149,6 +167,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
   }
 
   void _calculate() {
+    FocusManager.instance.primaryFocus?.unfocus();
     final start = graph.find(_startController.text);
     final stop = graph.find(_stopController.text);
     if (start == null || stop == null) {
@@ -174,7 +193,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
       return;
     }
 
-    final trip = graph.shortestTrip(start, stop);
+    final trip = graph.shortestTrip(start, stop, gateMode: _gateMode);
     if (trip.stations.isEmpty) {
       setState(() {
         _result = null;
@@ -230,6 +249,20 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
                 a.english.toLowerCase().compareTo(b.english.toLowerCase()),
     );
 
+    
+    
+    
+    final selStart = normalize(_startController.text);
+    final selStop = normalize(_stopController.text);
+    final startFieldOptions = [
+      for (final o in options)
+        if (normalize(o.english) != selStop) o,
+    ];
+    final stopFieldOptions = [
+      for (final o in options)
+        if (normalize(o.english) != selStart) o,
+    ];
+
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -257,6 +290,24 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
                 onSelectionChanged: (s) => widget.onLanguageChanged(s.first),
               ),
             ),
+            const SizedBox(height: 8),
+            SegmentedButton<GateMode>(
+              segments: const [
+                ButtonSegment(
+                  value: GateMode.fewestStops,
+                  label: Text('Fewest stops'),
+                  icon: Icon(Icons.route),
+                ),
+                ButtonSegment(
+                  value: GateMode.nearFirst,
+                  label: Text('Nearest first'),
+                  icon: Icon(Icons.near_me_outlined),
+                ),
+              ],
+              selected: {_gateMode},
+              onSelectionChanged: (s) => setState(() => _gateMode = s.first),
+
+            ),
             const SizedBox(height: 16),
             _StationField(
               controller: _startController,
@@ -268,7 +319,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
               ),
               pickerTooltip: _tr(lang, 'Choose from list', 'اختر من القائمة'),
               searchLabel: _tr(lang, 'Search stations', 'ابحث عن المحطات'),
-              options: options,
+              options: startFieldOptions,
             ),
             const SizedBox(height: 12),
             _StationField(
@@ -281,7 +332,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
               ),
               pickerTooltip: _tr(lang, 'Choose from list', 'اختر من القائمة'),
               searchLabel: _tr(lang, 'Search stations', 'ابحث عن المحطات'),
-              options: options,
+              options: stopFieldOptions,
             ),
             const SizedBox(height: 16),
             FilledButton.icon(

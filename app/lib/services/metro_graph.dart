@@ -1,6 +1,12 @@
 import '../models/metro_line.dart';
 import '../utils/normalize.dart';
 
+enum GateMode { fewestStops, nearFirst }
+
+
+
+const double transferDwellMinutes = 6.0;
+
 class MetroGraph {
   late final List<MetroLine> _lines;
   final Map<String, Set<String>> _neighbors = {};
@@ -111,7 +117,8 @@ class MetroGraph {
   List<String> shortestPath(String start, String stop) =>
       shortestTrip(start, stop).stations;
 
-  TripRoute shortestTrip(String start, String stop) {
+  TripRoute shortestTrip(String start, String stop,
+      {GateMode gateMode = GateMode.fewestStops}) {
     if (start == stop) {
       return TripRoute(
         stations: [_displayNames[start]!],
@@ -185,9 +192,27 @@ class MetroGraph {
       }
       for (final other in linesOf[station] ?? const <MetroLine>{}) {
         if (other != line) {
-          // A transfer is always worse than any number of stops, so the
-          // objective is: fewest transfers, then shortest trip.
-          relax(nodeOf(station, other), cost + 10000, best);
+int nearBonus(String gate, MetroLine line, String start,
+      Map<MetroLine, Map<String, int>> ordersByLine) {
+    final orderLine = ordersByLine[line];
+    if (orderLine == null) return 0;
+    final s = orderLine[start];
+    final g = orderLine[gate];
+    if (s == null || g == null) return 0;
+    
+    
+    return ((s - g).abs()).clamp(0, 29) * 3;
+  }
+
+          
+          
+          
+          
+          final bonus = switch (gateMode) {
+            GateMode.fewestStops => 0,
+            GateMode.nearFirst => nearBonus(station, line, start, ordersByLine),
+          };
+          relax(nodeOf(station, other), cost + 10000 - bonus, best);
         }
       }
     }
@@ -220,11 +245,29 @@ class MetroGraph {
       if (nodeLine(layered[i]) != nodeLine(layered[i + 1])) transfers++;
     }
 
+    
+    
+    
+    
+    
+    final lineByName = <String, MetroLine>{
+      for (final l in ordersByLine.keys) l.name: l,
+    };
+    var minutes = 0.0;
+    for (var i = 0; i < layered.length - 1; i++) {
+      if (nodeLine(layered[i]) == nodeLine(layered[i + 1])) {
+        final l = lineByName[nodeLine(layered[i])];
+        if (l != null) minutes += l.segmentMinutes;
+      } else {
+        minutes += transferDwellMinutes;
+      }
+    }
+
     return TripRoute(
       stations: stations,
       hops: stations.length - 1,
       transfers: transfers,
-      minutes: dist[goal]!,
+      minutes: minutes,
     );
   }
 

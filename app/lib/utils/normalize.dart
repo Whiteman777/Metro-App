@@ -32,8 +32,8 @@ int levenshtein(String a, String b) {
   return prev[lb];
 }
 
-/// Rank [candidates] against [query] by normalized edit distance (closest
-/// first). Only candidates within [maxDistance] edits are returned.
+
+
 List<String> fuzzyRank(String query, Iterable<String> candidates,
     {int maxDistance = 3}) {
   final q = normalize(query);
