@@ -8,6 +8,13 @@ import 'data/station_prompt.dart';
 import 'models/ticket.dart';
 import 'services/metro_graph.dart';
 
+/// Formats minutes >= 60 as "1h 30m" (English-only, real-world style).
+String _formatClocked(double minutes) {
+  final h = minutes ~/ 60;
+  final m = (minutes % 60).round();
+  return m == 0 ? '${h}h' : '${h}h ${m}m';
+}
+
 void main() {
   final graph = MetroGraph([
     const ElMargLine(),
@@ -33,7 +40,10 @@ void main() {
   print("number of stations => $hops");
   print("number of transfers => $transfers");
   print("direction => ${directions.join(" => ")}");
-  print("estimated time => ${duration.toStringAsFixed(2)} min");
+  final durationLabel = duration >= 60
+      ? _formatClocked(duration)
+      : "${duration.toStringAsFixed(2)} min";
+  print("estimated time => $durationLabel");
   print(
     "price => ${TicketType.forHops(hops).price}, ticket duration => ${TicketType.duration} hours",
   );

@@ -19,6 +19,25 @@ enum AppLang { english, arabic }
 String _tr(AppLang lang, String en, String ar) =>
     lang == AppLang.arabic ? ar : en;
 
+/// Formats a duration in minutes, switching to hours once it reaches 60.
+/// English spells out the unit ("1 hour 30 minutes"); Arabic uses
+/// ساعة/دقيقة with the usual plural forms.
+String _formatDuration(AppLang lang, double minutes) {
+  if (minutes < 60) {
+    return '${minutes.toStringAsFixed(0)} '
+        '${_tr(lang, 'minute(s)', 'دقيقة')}';
+  }
+  final h = minutes ~/ 60;
+  final m = (minutes % 60).round();
+  final hoursLabel = _tr(
+    lang,
+    h == 1 ? 'hour' : 'hours',
+    h == 1 ? 'ساعة' : 'ساعات',
+  );
+  final minutePart = m == 0 ? '' : ' $m ${_tr(lang, 'minute(s)', 'دقيقة')}';
+  return '$h $hoursLabel$minutePart';
+}
+
 String _stationName(AppLang lang, String en) =>
     lang == AppLang.arabic ? (arabicStations[en] ?? en) : en;
 
@@ -197,7 +216,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_tr(lang, 'Detro', 'دترو')),
+        title: const Text('Detro'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(
@@ -424,14 +443,13 @@ class _TripSummary extends StatelessWidget {
             ),
             _StatBox(
               label: _tr(lang, 'Time', 'الوقت'),
-              value: '${result.duration.toStringAsFixed(2)} '
-                  '${_tr(lang, 'min', 'دقيقة')}',
+              value: _formatDuration(lang, result.duration),
             ),
             _StatBox(
               label: _tr(lang, 'Price', 'السعر'),
               value: _tr(
                 lang,
-                '${result.ticket.price} EGP (${TicketType.duration} h)',
+                '${result.ticket.price} EGP (${TicketType.duration} hours)',
                 '${result.ticket.price} جنيه (${TicketType.duration} ساعات)',
               ),
             ),
