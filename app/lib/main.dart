@@ -215,9 +215,15 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
     );
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Detro'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(kToolbarHeight),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: AppBar(
+            title: const Text('Detro'),
+            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -331,10 +337,11 @@ class _StationField extends StatelessWidget {
               icon: const Icon(Icons.list),
               tooltip: pickerTooltip,
               onPressed: () async {
-                FocusScope.of(context).unfocus();
                 final picked = await showModalBottomSheet<StationOption>(
                   context: context,
                   isScrollControlled: true,
+                  useSafeArea: true,
+                  backgroundColor: Colors.transparent,
                   builder: (context) =>
                       _StationPicker(options: options, searchLabel: searchLabel),
                 );
@@ -382,34 +389,50 @@ class _StationPickerState extends State<_StationPicker> {
             ? widget.options
             : substring.isNotEmpty ? substring : _fuzzyOptions(normalized, widget.options);
 
-    return SafeArea(
-      child: SizedBox(
-        height: MediaQuery.of(context).size.height * 0.6,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: TextField(
-                autofocus: true,
-                decoration: InputDecoration(
-                  labelText: widget.searchLabel,
-                  prefixIcon: const Icon(Icons.search),
-                  border: const OutlineInputBorder(),
-                ),
-                onChanged: (value) => setState(() => _query = value),
-              ),
-            ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: filtered.length,
-                itemBuilder: (context, i) => ListTile(
-                  leading: const Icon(Icons.subway),
-                  title: Text(filtered[i].display),
-                  onTap: () => Navigator.pop(context, filtered[i]),
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: SafeArea(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height * 0.6,
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(top: 10, bottom: 6),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.outlineVariant,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                child: TextField(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    labelText: widget.searchLabel,
+                    prefixIcon: const Icon(Icons.search),
+                    border: const OutlineInputBorder(),
+                  ),
+                  onChanged: (value) => setState(() => _query = value),
+                ),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: filtered.length,
+                  itemBuilder: (context, i) => ListTile(
+                    leading: const Icon(Icons.subway),
+                    title: Text(filtered[i].display),
+                    onTap: () => Navigator.pop(context, filtered[i]),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
