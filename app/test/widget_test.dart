@@ -40,7 +40,8 @@ void main() {
     await tester.tap(find.text('العربية'));
     await tester.pumpAndSettle();
 
-    expect(find.text('دترو'), findsOneWidget);
+    // The app-name bar stays English even when the UI toggles to Arabic.
+    expect(find.text('Detro'), findsOneWidget);
     expect(find.text('احسب الرحلة'), findsOneWidget);
     expect(find.text('محطة الانطلاق'), findsOneWidget);
 

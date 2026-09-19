@@ -144,6 +144,12 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
     super.dispose();
   }
 
+  bool get _sameStation {
+    final start = _startController.text.trim().toLowerCase();
+    final stop = _stopController.text.trim().toLowerCase();
+    return start.isNotEmpty && start == stop;
+  }
+
   void _calculate() {
     final start = graph.find(_startController.text);
     final stop = graph.find(_stopController.text);
@@ -152,8 +158,19 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
         _result = null;
         _error = _tr(
           widget.language,
-          'Pick both a starting and a stop station from the list.',
-          'يرجى اختيار محطة الانطلاق ومحطة الوصول من القائمة.',
+          'Pick both a starting and a stop station.',
+          'اختر محطة الانطلاق ومحطة الوصول معًا.',
+        );
+      });
+      return;
+    }
+    if (_sameStation) {
+      setState(() {
+        _result = null;
+        _error = _tr(
+          widget.language,
+          'Start and stop stations must be different.',
+          'يجب أن تختلف محطة الانطلاق عن محطة الوصول.',
         );
       });
       return;
@@ -263,7 +280,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
             ),
             const SizedBox(height: 16),
             FilledButton.icon(
-              onPressed: _calculate,
+              onPressed: _sameStation ? null : _calculate,
               icon: const Icon(Icons.route),
               label: Text(_tr(lang, 'Calculate trip', 'احسب الرحلة')),
             ),
@@ -337,14 +354,14 @@ class _StationField extends StatelessWidget {
               icon: const Icon(Icons.list),
               tooltip: pickerTooltip,
               onPressed: () async {
-                final picked = await showModalBottomSheet<StationOption>(
-                  context: context,
-                  isScrollControlled: true,
-                  useSafeArea: true,
-                  backgroundColor: Colors.transparent,
-                  builder: (context) =>
-                      _StationPicker(options: options, searchLabel: searchLabel),
-                );
+          final picked = await showModalBottomSheet<StationOption>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            backgroundColor: Theme.of(context).colorScheme.surface,
+            builder: (context) =>
+                _StationPicker(options: options, searchLabel: searchLabel),
+          );
                 if (picked != null) {
                   fieldController.text = picked.display;
                   controller.text = picked.english;
@@ -395,9 +412,13 @@ class _StationPickerState extends State<_StationPicker> {
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-      child: SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height * 0.6,
+        child: Material(
+          color: Theme.of(context).colorScheme.surface,
+          clipBehavior: Clip.antiAlias,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          child: SafeArea(
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.6,
           child: Column(
             children: [
               Container(
@@ -434,12 +455,11 @@ class _StationPickerState extends State<_StationPicker> {
             ],
           ),
         ),
+        ),
       ),
     );
   }
-}
-
-class _TripSummary extends StatelessWidget {
+}class _TripSummary extends StatelessWidget {
   const _TripSummary({required this.result, required this.language});
 
   final TripResult result;
