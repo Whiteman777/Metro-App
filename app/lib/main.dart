@@ -104,9 +104,7 @@ List<StationOption> _fuzzyOptions(String query, List<StationOption> options) {
     scored.add((dEnglish < dDisplay ? dEnglish : dDisplay, o));
   }
   scored.sort((a, b) => a.$1.compareTo(b.$1));
-  return [for (final e in scored) e.$2]
-      .take(6)
-      .toList();
+  return [for (final e in scored) e.$2].take(6).toList();
 }
 
 class TripPlannerScreen extends StatefulWidget {
@@ -228,7 +226,8 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
     options.sort(
       lang == AppLang.arabic
           ? (a, b) => _arabicCompare(a.display, b.display)
-          : (a, b) => a.english.toLowerCase().compareTo(b.english.toLowerCase()),
+          : (a, b) =>
+                a.english.toLowerCase().compareTo(b.english.toLowerCase()),
     );
 
     return Scaffold(
@@ -262,8 +261,11 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
             _StationField(
               controller: _startController,
               label: _tr(lang, 'Starting station', 'محطة الانطلاق'),
-              hintText:
-                  _tr(lang, 'Start typing a station name...', 'ابدأ بكتابة اسم المحطة...'),
+              hintText: _tr(
+                lang,
+                'Start typing a station name...',
+                'ابدأ بكتابة اسم المحطة...',
+              ),
               pickerTooltip: _tr(lang, 'Choose from list', 'اختر من القائمة'),
               searchLabel: _tr(lang, 'Search stations', 'ابحث عن المحطات'),
               options: options,
@@ -272,8 +274,11 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
             _StationField(
               controller: _stopController,
               label: _tr(lang, 'Stop station', 'محطة الوصول'),
-              hintText:
-                  _tr(lang, 'Start typing a station name...', 'ابدأ بكتابة اسم المحطة...'),
+              hintText: _tr(
+                lang,
+                'Start typing a station name...',
+                'ابدأ بكتابة اسم المحطة...',
+              ),
               pickerTooltip: _tr(lang, 'Choose from list', 'اختر من القائمة'),
               searchLabel: _tr(lang, 'Search stations', 'ابحث عن المحطات'),
               options: options,
@@ -295,8 +300,7 @@ class _TripPlannerScreenState extends State<TripPlannerScreen> {
               ),
               const SizedBox(height: 16),
             ],
-            if (_result != null)
-              _TripSummary(result: _result!, language: lang),
+            if (_result != null) _TripSummary(result: _result!, language: lang),
           ],
         ),
       ),
@@ -327,13 +331,16 @@ class _StationField extends StatelessWidget {
       optionsBuilder: (TextEditingValue value) {
         if (value.text.isEmpty) return const Iterable<StationOption>.empty();
         final query = normalize(value.text);
-        final isExact = options.any((o) =>
-            normalize(o.english) == query || normalize(o.display) == query);
+        final isExact = options.any(
+          (o) => normalize(o.english) == query || normalize(o.display) == query,
+        );
         if (isExact) return const Iterable<StationOption>.empty();
         final matches = options
-            .where((o) =>
-                normalize(o.english).contains(query) ||
-                normalize(o.display).contains(query))
+            .where(
+              (o) =>
+                  normalize(o.english).contains(query) ||
+                  normalize(o.display).contains(query),
+            )
             .toList();
         if (matches.isNotEmpty) return matches;
         return _fuzzyOptions(query, options);
@@ -342,35 +349,37 @@ class _StationField extends StatelessWidget {
       onSelected: (option) => controller.text = option.english,
       fieldViewBuilder:
           (context, fieldController, focusNode, onFieldSubmitted) {
-        return TextField(
-          controller: fieldController,
-          focusNode: focusNode,
-          onChanged: (text) => controller.text = text,
-          decoration: InputDecoration(
-            labelText: label,
-            hintText: hintText,
-            border: const OutlineInputBorder(),
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.list),
-              tooltip: pickerTooltip,
-              onPressed: () async {
-          final picked = await showModalBottomSheet<StationOption>(
-            context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            backgroundColor: Theme.of(context).colorScheme.surface,
-            builder: (context) =>
-                _StationPicker(options: options, searchLabel: searchLabel),
-          );
-                if (picked != null) {
-                  fieldController.text = picked.display;
-                  controller.text = picked.english;
-                }
-              },
-            ),
-          ),
-        );
-      },
+            return TextField(
+              controller: fieldController,
+              focusNode: focusNode,
+              onChanged: (text) => controller.text = text,
+              decoration: InputDecoration(
+                labelText: label,
+                hintText: hintText,
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.list),
+                  tooltip: pickerTooltip,
+                  onPressed: () async {
+                    final picked = await showModalBottomSheet<StationOption>(
+                      context: context,
+                      isScrollControlled: true,
+                      useSafeArea: true,
+                      backgroundColor: Theme.of(context).colorScheme.surface,
+                      builder: (context) => _StationPicker(
+                        options: options,
+                        searchLabel: searchLabel,
+                      ),
+                    );
+                    if (picked != null) {
+                      fieldController.text = picked.display;
+                      controller.text = picked.english;
+                    }
+                  },
+                ),
+              ),
+            );
+          },
     );
   }
 }
@@ -391,75 +400,92 @@ class _StationPickerState extends State<_StationPicker> {
   @override
   Widget build(BuildContext context) {
     final normalized = normalize(_query);
-    final isExact = _query.isNotEmpty &&
-        widget.options.any((o) =>
-            normalize(o.english) == normalized ||
-            normalize(o.display) == normalized);
+    final isExact =
+        _query.isNotEmpty &&
+        widget.options.any(
+          (o) =>
+              normalize(o.english) == normalized ||
+              normalize(o.display) == normalized,
+        );
     final substring = widget.options
-        .where((o) =>
-            normalize(o.english).contains(normalized) ||
-            normalize(o.display).contains(normalized))
+        .where(
+          (o) =>
+              normalize(o.english).contains(normalized) ||
+              normalize(o.display).contains(normalized),
+        )
         .toList();
     final filtered = normalized.isEmpty
         ? widget.options
         : isExact
-            ? widget.options
-            : substring.isNotEmpty ? substring : _fuzzyOptions(normalized, widget.options);
+        ? widget.options
+        : substring.isNotEmpty
+        ? substring
+        : _fuzzyOptions(normalized, widget.options);
 
-    return AnimatedPadding(
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeOut,
+    return Padding(
       padding: EdgeInsets.only(
         bottom: MediaQuery.of(context).viewInsets.bottom,
       ),
-        child: Material(
-          color: Theme.of(context).colorScheme.surface,
-          clipBehavior: Clip.antiAlias,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          child: SafeArea(
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height * 0.6,
-          child: Column(
-            children: [
-              Container(
-                width: 40,
-                height: 4,
-                margin: const EdgeInsets.only(top: 10, bottom: 6),
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
-                child: TextField(
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    labelText: widget.searchLabel,
-                    prefixIcon: const Icon(Icons.search),
-                    border: const OutlineInputBorder(),
-                  ),
-                  onChanged: (value) => setState(() => _query = value),
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, i) => ListTile(
-                    leading: const Icon(Icons.subway),
-                    title: Text(filtered[i].display),
-                    onTap: () => Navigator.pop(context, filtered[i]),
+      child: Material(
+        color: Theme.of(context).colorScheme.surface,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        child: SafeArea(
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.6,
+            child: Column(
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 10, bottom: 6),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.outlineVariant,
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              ),
-            ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 4, 12, 12),
+                  child: TextField(
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      labelText: widget.searchLabel,
+                      prefixIcon: const Icon(Icons.search),
+                      border: const OutlineInputBorder(),
+                    ),
+                    onChanged: (value) => setState(() => _query = value),
+                  ),
+                ),
+                Expanded(
+                  child: NotificationListener<ScrollUpdateNotification>(
+                    onNotification: (n) {
+                      if (n.scrollDelta != 0 &&
+                          FocusManager.instance.primaryFocus?.hasFocus ==
+                              true) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      }
+                      return false;
+                    },
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) => ListTile(
+                        leading: const Icon(Icons.subway),
+                        title: Text(filtered[i].display),
+                        onTap: () => Navigator.pop(context, filtered[i]),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
         ),
       ),
     );
   }
-}class _TripSummary extends StatelessWidget {
+}
+
+class _TripSummary extends StatelessWidget {
   const _TripSummary({required this.result, required this.language});
 
   final TripResult result;
@@ -499,9 +525,12 @@ class _StationPickerState extends State<_StationPicker> {
           ],
         ),
         const SizedBox(height: 12),
-        Text(_tr(lang, 'Direction', 'الاتجاه'),
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          _tr(lang, 'Direction', 'الاتجاه'),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
         Wrap(
           spacing: 6,
@@ -515,19 +544,18 @@ class _StationPickerState extends State<_StationPicker> {
           ],
         ),
         const SizedBox(height: 16),
-        Text(_tr(lang, 'Route', 'المسار'),
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          _tr(lang, 'Route', 'المسار'),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 4),
         Card(
           child: Column(
             children: [
               for (var i = 0; i < result.route.length; i++)
-                _RouteTile(
-                  index: i,
-                  row: result.route[i],
-                  language: language,
-                ),
+                _RouteTile(index: i, row: result.route[i], language: language),
             ],
           ),
         ),
@@ -552,9 +580,7 @@ class _StatBox extends StatelessWidget {
           children: [
             Text(
               value,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleLarge
+              style: Theme.of(context).textTheme.titleLarge
                   ?.copyWith(fontWeight: FontWeight.bold),
             ),
             Text(label, style: Theme.of(context).textTheme.bodySmall),
@@ -582,8 +608,7 @@ class _RouteTile extends StatelessWidget {
       dense: true,
       leading: CircleAvatar(
         radius: 14,
-        child: Text('${index + 1}',
-            style: const TextStyle(fontSize: 12)),
+        child: Text('${index + 1}', style: const TextStyle(fontSize: 12)),
       ),
       title: Text(_stationName(language, row.name)),
       trailing: row.switchTo == null
@@ -594,8 +619,11 @@ class _RouteTile extends StatelessWidget {
                 const Icon(Icons.swap_horiz, color: Colors.amber),
                 const SizedBox(width: 4),
                 Text(
-                  _tr(language, row.switchTo!,
-                      row.switchTo!.replaceFirst('Line ', 'الخط ')),
+                  _tr(
+                    language,
+                    row.switchTo!,
+                    row.switchTo!.replaceFirst('Line ', 'الخط '),
+                  ),
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ],
